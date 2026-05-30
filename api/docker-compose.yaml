@@ -6,8 +6,8 @@ services:
     container_name: agrotani-postgres
     restart: always
     environment:
-      POSTGRES_USER: agrotani_user
-      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 12345
       POSTGRES_DB: agrotani_db
     ports:
       - "5432:5432"
