@@ -1,18 +1,18 @@
 import { AuthService } from './auth.service';
 import { Body, Controller, HttpCode, Post, Get, UseGuards } from '@nestjs/common';
 import { UserRegistrationDto, UserLoginDto } from './dto/auth.dto';
-import { User } from '@prisma/client';
+import { users } from '@prisma/client';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+    constructor(private readonly authService: AuthService) { }
 
     // Endpoint aslinya akan jadi /api/auth/register (otomatis oleh NestJS)
     @Post('register')
     @HttpCode(201)
-    async register(@Body() createUserDto: UserRegistrationDto): Promise<User> {
+    async register(@Body() createUserDto: UserRegistrationDto): Promise<users> {
         return this.authService.register(createUserDto);
     }
 

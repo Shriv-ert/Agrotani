@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Query } from '@nestjs/common';
+import { GeminiService } from './gemini/gemini.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  // Kita suntikkan GeminiService ke sini
+  constructor(private readonly geminiService: GeminiService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Get('test-gemini')
+  async testGemini(@Query('pesan') pesan: string) {
+    // Panggil fungsi chat dari GeminiService
+    return this.geminiService.chat(pesan || 'Halo, kamu siapa?', []);
   }
 }

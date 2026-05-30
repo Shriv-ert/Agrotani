@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserLoginDto, UserRegistrationDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { User } from '@prisma/client';
+import { users } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +11,7 @@ export class AuthService {
 
     async login(data: UserLoginDto){
         try {
-            const user = await this.prisma.user.findUnique({
+            const user = await this.prisma.users.findUnique({
                 where: {
                     email: data.email
                 }
@@ -38,7 +38,7 @@ export class AuthService {
     async register(data: UserRegistrationDto){
         try {
             // 1. Cek apakah email sudah terdaftar
-            const existingUser = await this.prisma.user.findUnique({
+            const existingUser = await this.prisma.users.findUnique({
                 where: { email: data.email }
             });
             if (existingUser) {
@@ -50,7 +50,7 @@ export class AuthService {
             const hashedPassword = await bcrypt.hash(data.password, 10);
 
             // 3. Simpan ke database
-            const user = await this.prisma.user.create({
+            const user = await this.prisma.users.create({
                 data: {
                     name: data.name,
                     email: data.email,
@@ -63,7 +63,7 @@ export class AuthService {
         }
     }
     getProfile(id: string){
-        return this.prisma.user.findUnique({
+        return this.prisma.users.findUnique({
             where: {id},
             select: {
                 name: true,
