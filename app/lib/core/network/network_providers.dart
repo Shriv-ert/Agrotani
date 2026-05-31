@@ -1,18 +1,47 @@
 // lib/core/network/network_providers.dart
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../constants/app_constants.dart';
+import '../services/token_service.dart';
 
-// Your laptop's IP address (Not localhost!)
-const String baseUrl = 'http://192.168.1.15:3000/api'; 
+/// Dio HTTP client with JWT interceptor
+/// The interceptor auto-attaches the Bearer token to every request.
+/// When 401 is received, it clears the token (user gets logged out via router).
 
-// 1. The Dio Provider
 final dioProvider = Provider<Dio>((ref) {
-  final dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-  ));
+  final tokenService = ref.watch(tokenServiceProvider);
 
-  // Later, we will add the JWT Token Interceptor right here!
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: AppConstants.baseUrl,
+      connectTimeout: AppConstants.connectTimeout,
+      receiveTimeout: AppConstants.receiveTimeout,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    ),
+  );
+
+  // JWT Interceptor
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final token = await tokenService.getToken();
+        if (token != null && token.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $token';
+        }
+        handler.next(options);
+      },
+      onError: (error, handler) async {
+        if (error.response?.statusCode == 401) {
+          // Token expired or invalid — clear it
+          await tokenService.deleteToken();
+        }
+        handler.next(error);
+      },
+    ),
+  );
+
   return dio;
 });
