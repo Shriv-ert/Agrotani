@@ -5,13 +5,15 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { GeminiModule } from './gemini/gemini.module';
+import { ScanModule } from './scan/scan.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
-    GeminiModule
+    GeminiModule,
+    ScanModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -78,6 +78,19 @@ Ringan / Sedang / Parah (pilih satu, jelaskan singkat)
 Hal penting yang perlu diperhatikan.
 Jika foto tidak jelas atau bukan tanaman, bilang bahwa foto perlu diambil ulang.
 Konteks: Tanaman di Indonesia, iklim tropis.
+** Tingkat keyakinan:**
+≥ 80% : ✅ "Dengan keyakinan tinggi, tanaman Anda terdeteksi..."
+        → Tampilkan diagnosis utama dengan rekomendasi lengkap
+
+60-79% : ⚡ "Kemungkinan besar tanaman Anda mengalami..."
+         → Tampilkan diagnosis utama + differential + saran verifikasi
+
+40-59% : ❓ "Beberapa kemungkinan yang kami deteksi..."
+         → Tampilkan beberapa opsi diagnosis + saran foto ulang
+
+< 40%  : 📸 "Kami membutuhkan foto yang lebih jelas..."
+         → Saran pengambilan foto ulang + tips foto yang baik
+         → Opsi untuk langsung konsultasi dengan FarmerBot
         `;
         // Ubah dari base64 menjadi format yang dipahami gemini
         const imageParts: Part = {
