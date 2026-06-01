@@ -11,7 +11,7 @@ export class AuthController {
 
     // Endpoint aslinya akan jadi /api/auth/register (otomatis oleh NestJS)
     @Post('register')
-    @HttpCode(201)
+    @HttpCode(201) 
     async register(@Body() createUserDto: UserRegistrationDto): Promise<users> {
         return this.authService.register(createUserDto);
     }
