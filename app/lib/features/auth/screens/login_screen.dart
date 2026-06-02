@@ -114,19 +114,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const SizedBox(height: 8),
 
-                      Text('Username', style: AppTextStyles.titleMedium),
+                      Text('Email', style: AppTextStyles.titleMedium),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _usernameCtrl,
-                        keyboardType: TextInputType.text,
+                        keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         enabled: !isLoading,
                         decoration: const InputDecoration(
-                          hintText: 'Masukkan username',
-                          prefixIcon: Icon(Icons.person_outline_rounded),
+                          hintText: 'Masukkan alamat email',
+                          prefixIcon: Icon(Icons.email_outlined),
                         ),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Username wajib diisi';
+                          if (v == null || v.isEmpty) return 'Email wajib diisi';
+                          if (!v.contains('@')) return 'Format email tidak valid';
                           return null;
                         },
                       ),

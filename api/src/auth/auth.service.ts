@@ -78,7 +78,13 @@ export class AuthService {
                 phone: true,    // ✅ FIX #3: tambah field profil lengkap
                 address: true,
                 aboutMe: true,
-                createdAt: true
+                createdAt: true,
+                _count: {
+                    select: {
+                        scans: true,
+                        chatSessions: true
+                    }
+                }
             }
         });
     }

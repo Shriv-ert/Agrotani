@@ -24,26 +24,16 @@ Aturan:
 - Jika ada unsur bahaya pada foto (misal api, racun), berikan peringatan tegas
 - Selalu sertakan disclaimer: "Hasil ini hanya perkiraan. Untuk kepastian, konsultasikan dengan penyuluh pertanian setempat"
 
-Format output diagnosis:
-{
-  "diagnosis": "Nama penyakit/hama",
-  "confidence": 0.85,
-  "severity": "rendah|sedang|tinggi",
-  "explanation": "Penjelasan singkat penyebabnya...",
-  "recommendations": [
-    { "step": 1, "action": "Langkah pencegahan/pengobatan..." },
-    { "step": 2, "action": "Langkah lanjutan..." },
-    { "step": 3, "action": "Penyuluhan..." }
-  ],
-  "disclaimer": "Hasil ini hanya perkiraan..."
-}
+Selalu jawab dalam format markdown berikut untuk analisis tanaman:
+**Diagnosis:** [nama penyakit]
+**Keparahan:** [Ringan/Sedang/Parah]
+**Keyakinan:** [angka]%
+**Rekomendasi:**
+- [langkah 1]
+- [langkah 2]
+**Catatan:** [catatan penting]
 
-Format output chat:
-{
-  "reply": "Jawaban dalam bahasa Indonesia...",
-  "is_expert": false,
-  "confidence": 0.90
-}
+Untuk obrolan biasa (chat), berikan jawaban langsung dalam teks biasa tanpa format khusus.
 `;
     constructor(private readonly config: ConfigService) {
         // fungsi dari this.config.get<string>('GEMINI_API_KEY') memiliki 2 tipe return antara string dan undefined
@@ -65,32 +55,17 @@ Format output chat:
         });
 
         const prompt = `
-        Analisis foto tanaman ini. Berikan jawaban dalam format:
-**🔍 Diagnosis:**
-Nama penyakit atau masalah yang terdeteksi.
-**📊 Tingkat Keparahan:**
-Ringan / Sedang / Parah (pilih satu, jelaskan singkat)
-**💊 Rekomendasi:**
-- Langkah 1: ...
-- Langkah 2: ...
-- Langkah 3: ...
-**⚠️ Catatan:**
-Hal penting yang perlu diperhatikan.
-Jika foto tidak jelas atau bukan tanaman, bilang bahwa foto perlu diambil ulang.
+        Analisis foto tanaman ini. Berikan jawaban HANYA dalam format markdown berikut:
+**Diagnosis:** [nama penyakit atau masalah yang terdeteksi]
+**Keparahan:** [Ringan / Sedang / Parah]
+**Keyakinan:** [angka keyakinan, misal 85%]
+**Rekomendasi:**
+- [Langkah pencegahan/pengobatan 1]
+- [Langkah lanjutan 2]
+**Catatan:** [Hal penting yang perlu diperhatikan]
+
+Jika foto tidak jelas atau bukan tanaman, bilang bahwa foto perlu diambil ulang pada bagian Diagnosis, dan beri tingkat Keparahan: Tidak Diketahui, Keyakinan: 0%.
 Konteks: Tanaman di Indonesia, iklim tropis.
-** Tingkat keyakinan:**
-≥ 80% : ✅ "Dengan keyakinan tinggi, tanaman Anda terdeteksi..."
-        → Tampilkan diagnosis utama dengan rekomendasi lengkap
-
-60-79% : ⚡ "Kemungkinan besar tanaman Anda mengalami..."
-         → Tampilkan diagnosis utama + differential + saran verifikasi
-
-40-59% : ❓ "Beberapa kemungkinan yang kami deteksi..."
-         → Tampilkan beberapa opsi diagnosis + saran foto ulang
-
-< 40%  : 📸 "Kami membutuhkan foto yang lebih jelas..."
-         → Saran pengambilan foto ulang + tips foto yang baik
-         → Opsi untuk langsung konsultasi dengan FarmerBot
         `;
         // Ubah dari base64 menjadi format yang dipahami gemini
         // Pastikan prefix 'data:...;base64,' dibuang jika ada

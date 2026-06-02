@@ -115,4 +115,26 @@ export class ChatService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async deleteSession(sessionId: string, userId: string) {
+    const session = await this.prisma.chatSessions.findUnique({
+      where: { id: sessionId },
+    });
+    if (!session) {
+      throw new NotFoundException('Chat session tidak ditemukan');
+    }
+    if (session.userId !== userId) {
+      throw new ForbiddenException('Akses ditolak');
+    }
+
+    await this.prisma.chatMessages.deleteMany({
+      where: { sessionId },
+    });
+
+    await this.prisma.chatSessions.delete({
+      where: { id: sessionId },
+    });
+
+    return { message: 'Chat session berhasil dihapus' };
+  }
 }

@@ -13,7 +13,7 @@ abstract class AuthRepository {
     required String name,
     required String phone,
     required String address,
-    required String username,
+    required String email,
     required String password,
     required String aboutMe,
   });
@@ -51,13 +51,13 @@ class MockAuthRepository implements AuthRepository {
     required String name,
     required String phone,
     required String address,
-    required String username,
+    required String email,
     required String password,
     required String aboutMe,
   }) async {
     await Future.delayed(AppConstants.mockDelay);
 
-    if (name.isEmpty || username.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       throw Exception('Semua field wajib diisi');
     }
     if (password.length < 6) {
@@ -67,7 +67,7 @@ class MockAuthRepository implements AuthRepository {
     _registeredUser = UserModel(
       id: 'mock-user-002',
       name: name,
-      email: username,
+      email: email,
       phone: phone,
       address: address,
       aboutMe: aboutMe,
@@ -115,7 +115,7 @@ class ApiAuthRepository implements AuthRepository {
     required String name,
     required String phone,
     required String address,
-    required String username,
+    required String email,
     required String password,
     required String aboutMe,
   }) async {
@@ -123,7 +123,7 @@ class ApiAuthRepository implements AuthRepository {
       'name': name,
       'phone': phone,
       'address': address,
-      'username': username,
+      'email': email,
       'password': password,
       'aboutMe': aboutMe,
     });

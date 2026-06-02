@@ -32,9 +32,6 @@ export class UserRegistrationDto {
     @IsString()
     address?: string;
 
-    @IsOptional()
-    @IsString()
-    username?: string; // diterima tapi tidak disimpan (Flutter mengirimnya, kita abaikan)
 
     @IsOptional()
     @IsString()

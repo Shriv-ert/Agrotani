@@ -12,8 +12,8 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    final historyAsync = ref.watch(scanHistoryProvider);
-    final totalScans = historyAsync.value?.length ?? 0;
+    final totalScans = user?.totalScans ?? 0;
+    final totalChats = user?.totalChats ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -116,18 +116,9 @@ class ProfileScreen extends ConsumerWidget {
                       Expanded(
                         child: _StatCard(
                           icon: Icons.chat_bubble_rounded,
-                          value: '1',
+                          value: '$totalChats',
                           label: 'Sesi Chat',
                           color: AppColors.accent,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.star_rounded,
-                          value: _getAccuracyRate(historyAsync.value),
-                          label: 'Akurasi',
-                          color: AppColors.info,
                         ),
                       ),
                     ],
@@ -151,18 +142,6 @@ class ProfileScreen extends ConsumerWidget {
                         showDivider: false,
                       ),
                     ],
-                  ),
-
-                  const SizedBox(height: 16),
-                  
-                  ElevatedButton.icon(
-                    onPressed: () => _showEditAboutMeDialog(context, ref, user?.aboutMe ?? ''),
-                    icon: const Icon(Icons.edit_rounded, size: 18),
-                    label: const Text('Edit Profil'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryLight,
-                      minimumSize: const Size(double.infinity, 48),
-                    ),
                   ),
 
                   const SizedBox(height: 16),
@@ -215,11 +194,6 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  String _getAccuracyRate(List<dynamic>? scans) {
-    if (scans == null || scans.isEmpty) return '-';
-    return '89%'; // Mock
-  }
-
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -248,45 +222,10 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditAboutMeDialog(BuildContext context, WidgetRef ref, String currentAboutMe) {
-    final controller = TextEditingController(text: currentAboutMe);
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Edit Tentang Diri', style: AppTextStyles.headlineSmall),
-        content: TextField(
-          controller: controller,
-          maxLines: 3,
-          decoration: InputDecoration(
-            hintText: 'Ceritakan sedikit tentang Anda...',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              ref.read(authNotifierProvider.notifier).updateAboutMe(controller.text);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryLight,
-            ),
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _confirmLogout(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Keluar?', style: AppTextStyles.headlineSmall),
         content: Text(
@@ -295,7 +234,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Batal',
               style: TextStyle(color: AppColors.textSecondary),
@@ -303,7 +242,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await ref.read(authNotifierProvider.notifier).logout();
               // Router redirect handles navigation to login
             },

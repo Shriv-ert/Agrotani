@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
 import '../data/models/chat_message_model.dart';
 import '../providers/chat_notifier.dart';
+import '../data/repositories/chat_repository.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -52,6 +53,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     await ref.read(chatNotifierProvider.notifier).sendMessage(content);
     _scrollToBottom();
+  }
+
+  void _showSessionList(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return const _SessionListBottomSheet();
+      },
+    );
   }
 
   @override
@@ -104,6 +118,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.list_alt_rounded, color: AppColors.textPrimary),
+            onPressed: () => _showSessionList(context),
+            tooltip: 'Daftar Sesi',
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_comment_rounded, color: AppColors.primaryLight),
+            onPressed: () => ref.read(chatNotifierProvider.notifier).newSession(),
+            tooltip: 'Sesi Baru',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         children: [
@@ -501,6 +528,71 @@ class _ChatInputBar extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Session List Bottom Sheet ────────────────────────────────────────────
+class _SessionListBottomSheet extends ConsumerWidget {
+  const _SessionListBottomSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        Container(
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: AppColors.divider,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text('Daftar Sesi Chat', style: AppTextStyles.titleLarge),
+        const SizedBox(height: 16),
+        Expanded(
+          child: FutureBuilder<List<ChatSessionModel>>(
+            future: ref.read(chatRepositoryProvider).getSessions(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return const Center(child: Text('Gagal memuat sesi chat'));
+              }
+              final sessions = snapshot.data ?? [];
+              if (sessions.isEmpty) {
+                return const Center(child: Text('Belum ada riwayat chat.'));
+              }
+              return ListView.builder(
+                itemCount: sessions.length,
+                itemBuilder: (context, index) {
+                  final session = sessions[index];
+                  return ListTile(
+                    leading: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.primaryLight),
+                    title: Text(
+                      session.title ?? 'Sesi Obrolan',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.titleMedium,
+                    ),
+                    subtitle: Text(
+                      'Diperbarui: ${session.updatedAt.toLocal().toString().split('.')[0]}',
+                      style: AppTextStyles.bodySmall,
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      ref.read(chatNotifierProvider.notifier).loadSession(session.id);
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

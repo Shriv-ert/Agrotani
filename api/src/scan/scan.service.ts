@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { GeminiService } from 'src/gemini/gemini.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as fs from 'fs'
@@ -22,28 +22,44 @@ export class ScanService {
         let recommendation = "Tidak diketahui";
         let confidence = "Tidak diketahui";
         try {
-            const lines = AIResponse.split('\n');
-            // cari index key
-            const diagIndex = lines.findIndex(l => l.includes('Diagnosis'));
-            const sevIndex = lines.findIndex(l => l.includes('Tingkat keparahan'));
-            const recIndex = lines.findIndex(l => l.includes('Rekomendasi'));
-            const confIndex = lines.findIndex(l => l.includes('Tingkat keyakinan'));
-            
-            // ✅ FIX: masing-masing hasil diassign ke variabelnya sendiri
-            if (diagIndex !== -1 && lines[diagIndex+1]){
-                diagnosis = lines[diagIndex+1].trim();
+            // Diagnosis: tangkap teks setelah **Diagnosis:** sampai newline
+            const diagMatch = AIResponse.match(/\*{0,2}Diagnosis\*{0,2}[:\s]*([^\n]+)/i);
+            if (diagMatch && diagMatch[1]) {
+                diagnosis = diagMatch[1].replace(/\*/g, '').trim();
             }
-            if (sevIndex !== -1 && lines[sevIndex+1]){
-                severity = lines[sevIndex+1].trim();  // ← sebelumnya salah: diagnosis = ...
+
+            // Keparahan
+            const sevMatch = AIResponse.match(/\*{0,2}Keparahan\*{0,2}[:\s]*([^\n]+)/i);
+            if (sevMatch && sevMatch[1]) {
+                let s = sevMatch[1].replace(/\*/g, '').toLowerCase();
+                if (s.includes('ringan') || s.includes('rendah')) severity = 'Ringan';
+                else if (s.includes('parah') || s.includes('tinggi') || s.includes('berat')) severity = 'Parah';
+                else if (s.includes('sedang')) severity = 'Sedang';
+                else severity = sevMatch[1].replace(/\*/g, '').trim();
             }
-            if (recIndex !== -1 && lines[recIndex+1]){
-                recommendation = lines.slice(recIndex+1).join('\n').trim();  // ← ambil semua baris setelah keyword
+
+            // Keyakinan: cari angka persentase
+            const confMatch = AIResponse.match(/\*{0,2}Keyakinan\*{0,2}[:\s]*.*?(\d+)\s*%/i);
+            if (confMatch && confMatch[1]) {
+                confidence = `${confMatch[1]}%`;
+            } else {
+                // Fallback cari persentase di baris yang sama atau dekat
+                const confMatchFallback = AIResponse.match(/Keyakinan.*?(\d+)%/i);
+                if (confMatchFallback && confMatchFallback[1]) confidence = `${confMatchFallback[1]}%`;
             }
-            if (confIndex !== -1 && lines[confIndex+1]){
-                confidence = lines[confIndex+1].trim();  // ← sebelumnya salah: diagnosis = ...
+
+            // Rekomendasi: dari keyword Rekomendasi sampai sebelum Catatan atau akhir teks
+            const recMatch = AIResponse.match(/\*{0,2}Rekomendasi\*{0,2}[:\s]*([\s\S]*?)(?=\*{0,2}Catatan\*{0,2}[:\s]*|$)/i);
+            if (recMatch && recMatch[1]) {
+                recommendation = recMatch[1].trim();
             }
         } catch (e) {
             console.error("gagal parsing teks", e);
+        }
+
+        // Fallback jika tidak ada diagnosis yang ter-parse, simpan seluruh response
+        if (diagnosis === AIResponse || diagnosis === "") {
+            diagnosis = AIResponse.split('\n')[0].substring(0, 50); // Ambil cuplikan saja
         }
         // simpan hasil ke DB
         const result = await this.prisma.scans.create({
@@ -79,7 +95,7 @@ export class ScanService {
             }
         })
         if(!scan || scan.userId !== userId){
-            throw new Error("Scan tidak ditemukan");
+            throw new NotFoundException("Scan tidak ditemukan");
         }
         return scan;
     }

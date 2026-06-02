@@ -8,6 +8,8 @@ class UserModel {
   final String address;
   final String aboutMe;
   final DateTime? createdAt;
+  final int totalScans;
+  final int totalChats;
 
   const UserModel({
     required this.id,
@@ -17,9 +19,18 @@ class UserModel {
     this.address = '',
     this.aboutMe = '',
     this.createdAt,
+    this.totalScans = 0,
+    this.totalChats = 0,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    int parsedScans = 0;
+    int parsedChats = 0;
+    if (json['_count'] != null) {
+      parsedScans = json['_count']['scans'] as int? ?? 0;
+      parsedChats = json['_count']['chatSessions'] as int? ?? 0;
+    }
+
     return UserModel(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
@@ -30,6 +41,8 @@ class UserModel {
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String)
           : null,
+      totalScans: parsedScans,
+      totalChats: parsedChats,
     );
   }
 
@@ -41,6 +54,10 @@ class UserModel {
     'address': address,
     'aboutMe': aboutMe,
     'createdAt': createdAt?.toIso8601String(),
+    '_count': {
+      'scans': totalScans,
+      'chatSessions': totalChats,
+    }
   };
 
   /// Mock user for development
@@ -61,6 +78,8 @@ class UserModel {
     String? address,
     String? aboutMe,
     DateTime? createdAt,
+    int? totalScans,
+    int? totalChats,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -70,6 +89,8 @@ class UserModel {
       address: address ?? this.address,
       aboutMe: aboutMe ?? this.aboutMe,
       createdAt: createdAt ?? this.createdAt,
+      totalScans: totalScans ?? this.totalScans,
+      totalChats: totalChats ?? this.totalChats,
     );
   }
 }

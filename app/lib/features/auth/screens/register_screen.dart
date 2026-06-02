@@ -18,7 +18,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _usernameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
   final _addressCtrl = TextEditingController();
   final _aboutMeCtrl = TextEditingController();
@@ -30,7 +30,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _usernameCtrl.dispose();
+    _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _addressCtrl.dispose();
     _aboutMeCtrl.dispose();
@@ -45,7 +45,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final success = await ref.read(authNotifierProvider.notifier).register(
       name: _nameCtrl.text.trim(),
-      username: _usernameCtrl.text.trim(),
+      email: _emailCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
       address: _addressCtrl.text.trim(),
       aboutMe: _aboutMeCtrl.text.trim(),
@@ -172,20 +172,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // ── Username ──────────────────────────────────────────────
-                Text('Username', style: AppTextStyles.titleMedium),
+                // ── Email ──────────────────────────────────────────────
+                Text('Email', style: AppTextStyles.titleMedium),
                 const SizedBox(height: 8),
                 TextFormField(
-                  controller: _usernameCtrl,
-                  keyboardType: TextInputType.text,
+                  controller: _emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   enabled: !isLoading,
                   decoration: const InputDecoration(
-                    hintText: 'Masukkan username',
-                    prefixIcon: Icon(Icons.person_outline_rounded),
+                    hintText: 'Masukkan alamat email',
+                    prefixIcon: Icon(Icons.email_outlined),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Username wajib diisi';
+                    if (v == null || v.trim().isEmpty) return 'Email wajib diisi';
+                    if (!v.contains('@')) return 'Format email tidak valid';
                     return null;
                   },
                 ),

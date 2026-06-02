@@ -38,7 +38,19 @@ class ChatState {
 class ChatNotifier extends AsyncNotifier<ChatState> {
   @override
   Future<ChatState> build() async {
-    // Mulai dengan state kosong — session dibuat oleh API saat pesan pertama dikirim
+    try {
+      final sessions = await ref.read(chatRepositoryProvider).getSessions();
+      if (sessions.isNotEmpty) {
+        final latestSession = sessions.first;
+        final messages = await ref.read(chatRepositoryProvider).getMessages(latestSession.id);
+        return ChatState(
+          sessionId: latestSession.id,
+          messages: messages,
+        );
+      }
+    } catch (e) {
+      // Ignore errors and fallback to empty state
+    }
     return const ChatState();
   }
 
@@ -100,6 +112,19 @@ class ChatNotifier extends AsyncNotifier<ChatState> {
   // Reset chat — mulai sesi baru
   Future<void> newSession() async {
     state = const AsyncValue.data(ChatState());
+  }
+
+  Future<void> loadSession(String sessionId) async {
+    state = const AsyncValue.loading();
+    try {
+      final messages = await ref.read(chatRepositoryProvider).getMessages(sessionId);
+      state = AsyncValue.data(ChatState(
+        sessionId: sessionId,
+        messages: messages,
+      ));
+    } catch (e) {
+      state = const AsyncValue.data(ChatState(errorMessage: 'Gagal memuat sesi chat'));
+    }
   }
 
   void clearError() {

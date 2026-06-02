@@ -236,13 +236,13 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen>
   }
 
   Color _getSeverityColor(String severity) {
-    switch (severity) {
-      case 'Parah':
-        return AppColors.severityHigh;
-      case 'Sedang':
-        return AppColors.severityMedium;
-      default:
-        return AppColors.severityLow;
+    final lowerSev = severity.toLowerCase();
+    if (lowerSev.contains('parah') || lowerSev.contains('tinggi')) {
+      return AppColors.severityHigh;
+    } else if (lowerSev.contains('sedang')) {
+      return AppColors.severityMedium;
+    } else {
+      return AppColors.severityLow;
     }
   }
 }

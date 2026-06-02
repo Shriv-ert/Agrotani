@@ -125,6 +125,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     onTap: () => context.push(AppRoutes.scan),
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // ── Quick Chat CTA ────────────────────────────────────
+                  _QuickChatCard(
+                    onTap: () => context.go(AppRoutes.chat),
+                  ),
+
                   const SizedBox(height: 24),
 
                   // ── Daily Tip ─────────────────────────────────────────
@@ -279,6 +286,70 @@ class _QuickScanCard extends StatelessWidget {
                 size: 44,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Quick Chat Card ──────────────────────────────────────────────────────
+class _QuickChatCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _QuickChatCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppConstants.radiusXl),
+          border: Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(
+                Icons.smart_toy_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tanya FarmerBot',
+                    style: AppTextStyles.titleLarge.copyWith(color: AppColors.primaryMid),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Asisten AI siap menjawab pertanyaan seputar pertanian',
+                    style: AppTextStyles.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primaryLight, size: 16),
           ],
         ),
       ),
