@@ -38,21 +38,18 @@ class ChatState {
 class ChatNotifier extends AsyncNotifier<ChatState> {
   @override
   Future<ChatState> build() async {
-    // Load initial messages (or start fresh)
-    const sessionId = 'session-001';
-    final messages = await ref
-        .read(chatRepositoryProvider)
-        .getMessages(sessionId);
-    return ChatState(messages: messages, sessionId: sessionId);
+    // Mulai dengan state kosong — session dibuat oleh API saat pesan pertama dikirim
+    return const ChatState();
   }
 
   Future<void> sendMessage(String content, {String? imageUrl}) async {
     final currentState = state.value;
     if (currentState == null) return;
 
-    // 1. Optimistic update — add user message immediately to UI
+    // 1. Optimistic update — tambahkan pesan user ke UI langsung
+    final tempSessionId = currentState.sessionId ?? '';
     final userMsg = ChatMessageModel.userMessage(
-      sessionId: currentState.sessionId ?? 'session-001',
+      sessionId: tempSessionId,
       content: content,
       imageUrl: imageUrl,
     );
@@ -66,20 +63,24 @@ class ChatNotifier extends AsyncNotifier<ChatState> {
     );
 
     try {
-      // 2. Send to backend/mock and get bot response
-      final botMsg = await ref.read(chatRepositoryProvider).sendMessage(
+      // 2. Kirim ke API — sessionId null = buat sesi baru otomatis di backend
+      final response = await ref.read(chatRepositoryProvider).sendMessage(
         message: content,
         sessionId: currentState.sessionId,
         imageUrl: imageUrl,
       );
 
-      // 3. Append bot response
+      // 3. Buat bot message dari response API
+      // ApiChatRepository.sendMessage mengembalikan ChatMessageModel dari response
+      // response.data = { sessionId: '...', reply: '...' }
       final updatedState = state.value;
       if (updatedState != null) {
         state = AsyncValue.data(
           updatedState.copyWith(
-            messages: [...updatedState.messages, botMsg],
+            messages: [...updatedState.messages, response],
             isSending: false,
+            // Simpan sessionId dari response jika belum ada (sesi baru)
+            sessionId: updatedState.sessionId ?? response.sessionId,
           ),
         );
       }
@@ -96,6 +97,11 @@ class ChatNotifier extends AsyncNotifier<ChatState> {
     }
   }
 
+  // Reset chat — mulai sesi baru
+  Future<void> newSession() async {
+    state = const AsyncValue.data(ChatState());
+  }
+
   void clearError() {
     final currentState = state.value;
     if (currentState != null) {
@@ -104,7 +110,6 @@ class ChatNotifier extends AsyncNotifier<ChatState> {
   }
 
   Future<void> setScanContext(ScanResultModel scan) async {
-    // Pastikan state sudah selesai inisialisasi
     final currentState = await future;
 
     final alreadyInjected = currentState.messages.any(

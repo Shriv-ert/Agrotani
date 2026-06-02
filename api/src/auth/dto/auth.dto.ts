@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 
 export class UserLoginDto{
 
@@ -13,6 +13,7 @@ export class UserLoginDto{
 
 export class UserRegistrationDto {
     @IsNotEmpty()
+    @IsString()
     name: string;
 
     @IsEmail()
@@ -22,4 +23,20 @@ export class UserRegistrationDto {
     @IsNotEmpty()
     @MinLength(8)
     password: string;
+
+    @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
+    @IsString()
+    address?: string;
+
+    @IsOptional()
+    @IsString()
+    username?: string; // diterima tapi tidak disimpan (Flutter mengirimnya, kita abaikan)
+
+    @IsOptional()
+    @IsString()
+    aboutMe?: string;
 }

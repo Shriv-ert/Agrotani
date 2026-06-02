@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserLoginDto, UserRegistrationDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { users } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -26,15 +25,16 @@ export class AuthService {
                 throw new UnauthorizedException("Email atau password salah");
             }
 
-            const token = this.jwtService.sign({ id: user.id });
+            const accessToken = this.jwtService.sign({ id: user.id });
             return {
                 message: "Login berhasil",
-                token
+                accessToken  // ✅ FIX #1: key diubah dari 'token' ke 'accessToken' agar cocok dengan Flutter
             }
         } catch (error) {
             throw error
         }
     }
+
     async register(data: UserRegistrationDto){
         try {
             // 1. Cek apakah email sudah terdaftar
@@ -42,34 +42,45 @@ export class AuthService {
                 where: { email: data.email }
             });
             if (existingUser) {
-                // Return error jika email sudah ada
                 throw new ConflictException("Email sudah terdaftar"); 
             }
 
-            // 2. Hash password sebelum disimpan! JANGAN simpan plain text.
+            // 2. Hash password
             const hashedPassword = await bcrypt.hash(data.password, 10);
 
-            // 3. Simpan ke database
+            // 3. Simpan ke database — termasuk field baru dari Flutter ✅ FIX #2
             const user = await this.prisma.users.create({
                 data: {
                     name: data.name,
                     email: data.email,
-                    password: hashedPassword
+                    password: hashedPassword,
+                    phone: data.phone,
+                    address: data.address,
+                    aboutMe: data.aboutMe,
                 }
             });
-            return user;
+
+            // Jangan kembalikan password ke client!
+            const { password: _, ...userWithoutPassword } = user;
+            return userWithoutPassword;
         } catch (error) {
             throw error
         }
     }
+
     getProfile(id: string){
         return this.prisma.users.findUnique({
             where: {id},
             select: {
+                id: true,
                 name: true,
                 email: true,
+                phone: true,    // ✅ FIX #3: tambah field profil lengkap
+                address: true,
+                aboutMe: true,
                 createdAt: true
             }
         });
     }
 }
+

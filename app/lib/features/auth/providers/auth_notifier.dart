@@ -128,13 +128,27 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   String _parseError(Object e) {
+    // Coba baca pesan dari response body API (DioException)
+    if (e.toString().contains('DioException') || e.runtimeType.toString().contains('Dio')) {
+      try {
+        // ignore: avoid_dynamic_calls
+        final dynamic err = e;
+        final responseData = err.response?.data;
+        if (responseData is Map && responseData['message'] != null) {
+          return responseData['message'].toString();
+        }
+      } catch (_) {}
+    }
+
     final msg = e.toString();
-    if (msg.contains('Email')) return 'Email atau password salah';
-    if (msg.contains('password')) return 'Password minimal 6 karakter';
-    if (msg.contains('email')) return 'Format email tidak valid';
-    if (msg.contains('kosong')) return 'Semua field wajib diisi';
-    if (msg.contains('SocketException') || msg.contains('connection')) {
-      return 'Tidak ada koneksi internet';
+    if (msg.contains('401')) return 'Email atau password salah';
+    if (msg.contains('409') || msg.contains('sudah terdaftar')) return 'Email sudah terdaftar';
+    if (msg.contains('400')) return 'Data yang dimasukkan tidak valid';
+    if (msg.contains('SocketException') || msg.contains('connection') || msg.contains('Network')) {
+      return 'Tidak dapat terhubung ke server. Pastikan WiFi aktif.';
+    }
+    if (msg.contains('TimeoutException') || msg.contains('timeout')) {
+      return 'Koneksi timeout. Coba lagi.';
     }
     return 'Terjadi kesalahan. Coba lagi.';
   }

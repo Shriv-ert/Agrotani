@@ -9,7 +9,7 @@ export class ChatService {
     private readonly geminiService: GeminiService,
   ) {}
 
-  async sendMessage(userId: string, dto: { sessionId?: string; message: string }) {
+  async sendMessage(userId: string, dto: { sessionId?: string; message: string; imageUrl?: string }) {
     let sessionId = dto.sessionId;
 
     if (sessionId) {
@@ -49,6 +49,7 @@ export class ChatService {
         sessionId,
         role: 'user',
         content: dto.message,
+        imageUrl: dto.imageUrl ?? null, // ✅ FIX #4: simpan imageUrl jika ada
       },
     });
 
@@ -77,10 +78,25 @@ export class ChatService {
   }
 
   async getSessions(userId: string) {
-    return this.prisma.chatSessions.findMany({
+    const sessions = await this.prisma.chatSessions.findMany({
       where: { userId },
       orderBy: { updatedAt: 'desc' },
+      include: {
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          take: 1, // ✅ FIX #5: ambil pesan terakhir untuk preview di Flutter
+        },
+      },
     });
+
+    // Ubah format agar Flutter bisa baca 'lastMessage' langsung
+    return sessions.map((s) => ({
+      id: s.id,
+      title: s.title,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+      lastMessage: s.messages[0] ?? null,
+    }));
   }
 
   async getMessages(sessionId: string, userId: string) {

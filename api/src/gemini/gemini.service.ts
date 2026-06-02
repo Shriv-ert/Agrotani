@@ -93,9 +93,14 @@ Konteks: Tanaman di Indonesia, iklim tropis.
          → Opsi untuk langsung konsultasi dengan FarmerBot
         `;
         // Ubah dari base64 menjadi format yang dipahami gemini
+        // Pastikan prefix 'data:...;base64,' dibuang jika ada
+        let cleanBase64 = imageBase64;
+        if (cleanBase64.includes(',')) {
+            cleanBase64 = cleanBase64.split(',')[1];
+        }
         const imageParts: Part = {
             inlineData:{
-                data:imageBase64,
+                data:cleanBase64,
                 mimeType:mimeType
             }
         } 

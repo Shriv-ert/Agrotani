@@ -9,9 +9,15 @@ class AppConstants {
   static const String appTagline = 'Asisten Pertanian Cerdas';
 
   // ── API ────────────────────────────────────────────────────────────
-  // Change this to your backend IP when running on local network
-  // e.g., 'http://192.168.1.100:3000/api'
-  static const String baseUrl = 'http://192.168.1.15:3000/api';
+  // Cara ubah tanpa edit kode:
+  //   flutter run --dart-define=API_URL=http://192.168.x.x:3000/api
+  // Atau edit .vscode/launch.json (lebih praktis)
+  // Emulator Android pakai: http://10.0.2.2:3000/api
+  // Device fisik pakai: http://<IP-laptop>:3000/api
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://192.168.200.253:3000/api', // fallback ke IP WiFi saat ini
+  );
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);
 

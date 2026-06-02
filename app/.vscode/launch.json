@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Agrotani (Device Fisik/WiFi)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_URL=http://192.168.200.253:3000/api"
+      ]
+    },
+    {
+      "name": "Agrotani (Emulator Android)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_URL=http://10.0.2.2:3000/api"
+      ]
+    },
+    {
+      "name": "Agrotani (Web - Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_URL=http://localhost:3000/api"
+      ],
+      "deviceId": "chrome"
+    }
+  ]
+}

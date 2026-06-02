@@ -41,7 +41,7 @@ describe('ChatService', () => {
     await expect(
       service.sendMessage(
         '816219a1-1f06-4091-b7a7-bb256e0d4ef1',
-        'Halo',
+        { message: 'Halo', sessionId: 'some-session-id' }, // fix: dto adalah object, bukan string
       ),
     ).rejects.toThrow('Chat session tidak ditemukan');
   });

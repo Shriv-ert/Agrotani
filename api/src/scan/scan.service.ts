@@ -12,7 +12,7 @@ export class ScanService {
     async analyzeAndSave(file: Express.Multer.File, userId: string){
         // Baca gambar
         const imageBuffer = fs.readFileSync(file.path)
-        const base64image = `data:image/${file.mimetype.split('/')[1]};base64,`+ imageBuffer.toString('base64');
+        const base64image = imageBuffer.toString('base64');
         const mimeType = file.mimetype;
         // panggil gemini
         const AIResponse = await this.geminiService.analyzeImage(base64image, mimeType);
@@ -29,18 +29,18 @@ export class ScanService {
             const recIndex = lines.findIndex(l => l.includes('Rekomendasi'));
             const confIndex = lines.findIndex(l => l.includes('Tingkat keyakinan'));
             
-            // Ambil teks setelah key
+            // ✅ FIX: masing-masing hasil diassign ke variabelnya sendiri
             if (diagIndex !== -1 && lines[diagIndex+1]){
                 diagnosis = lines[diagIndex+1].trim();
             }
             if (sevIndex !== -1 && lines[sevIndex+1]){
-                diagnosis = lines[sevIndex+1].trim();
+                severity = lines[sevIndex+1].trim();  // ← sebelumnya salah: diagnosis = ...
             }
             if (recIndex !== -1 && lines[recIndex+1]){
-                diagnosis = lines[recIndex+1].trim();
+                recommendation = lines.slice(recIndex+1).join('\n').trim();  // ← ambil semua baris setelah keyword
             }
             if (confIndex !== -1 && lines[confIndex+1]){
-                diagnosis = lines[confIndex+1].trim();
+                confidence = lines[confIndex+1].trim();  // ← sebelumnya salah: diagnosis = ...
             }
         } catch (e) {
             console.error("gagal parsing teks", e);

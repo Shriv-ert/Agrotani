@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/services/token_service.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/network/network_providers.dart'; // ← untuk dioProvider
 import '../models/user_model.dart';
 
 // ── 1. THE CONTRACT (Interface) ───────────────────────────────────────
@@ -118,7 +119,7 @@ class ApiAuthRepository implements AuthRepository {
     required String password,
     required String aboutMe,
   }) async {
-    final response = await dio.post('/auth/register', data: {
+    await dio.post('/auth/register', data: {
       'name': name,
       'phone': phone,
       'address': address,
@@ -147,9 +148,9 @@ class ApiAuthRepository implements AuthRepository {
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final tokenService = ref.watch(tokenServiceProvider);
 
-  // 👇 MOCK: Use during development (backend not ready)
-  return MockAuthRepository(tokenService);
+  // 👇 REAL: Connected to NestJS backend
+  return ApiAuthRepository(ref.watch(dioProvider), tokenService);
 
-  // 👇 REAL: Uncomment when NestJS backend is running
-  // return ApiAuthRepository(ref.watch(dioProvider), tokenService);
+  // 👇 MOCK: Uncomment to go back to mock during development
+  // return MockAuthRepository(tokenService);
 });

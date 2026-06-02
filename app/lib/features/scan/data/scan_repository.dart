@@ -105,9 +105,9 @@ class ApiScanRepository implements ScanRepository {
 // ── 4. PROVIDER SWITCH ──────────────────────────────────────────────────
 // ✅ ONE LINE TOGGLE — Mock ↔ Real API
 final scanRepositoryProvider = Provider<ScanRepository>((ref) {
-  // 👇 MOCK: Remove this line when backend is ready
-  return MockScanRepository();
+  // 👇 REAL: Connected to NestJS backend
+  return ApiScanRepository(ref.watch(dioProvider));
 
-  // 👇 REAL: Uncomment when NestJS is running
-  // return ApiScanRepository(ref.watch(dioProvider));
+  // 👇 MOCK: Uncomment to go back to mock during development
+  // return MockScanRepository();
 });

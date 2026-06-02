@@ -154,7 +154,16 @@ class ApiChatRepository implements ChatRepository {
       if (sessionId != null) 'sessionId': sessionId,
       if (imageUrl != null) 'imageUrl': imageUrl,
     });
-    return ChatMessageModel.fromJson(response.data as Map<String, dynamic>);
+    // API mengembalikan { sessionId: '...', reply: '...' }
+    // bukan ChatMessageModel langsung, jadi kita buat manual
+    final data = response.data as Map<String, dynamic>;
+    return ChatMessageModel(
+      id: 'api-${DateTime.now().millisecondsSinceEpoch}',
+      sessionId: data['sessionId'] as String? ?? '',
+      role: 'bot',
+      content: data['reply'] as String? ?? '',
+      createdAt: DateTime.now(),
+    );
   }
 
   @override
@@ -175,9 +184,9 @@ class ApiChatRepository implements ChatRepository {
 // ── 4. PROVIDER SWITCH ──────────────────────────────────────────────────
 // ✅ ONE LINE TOGGLE
 final chatRepositoryProvider = Provider<ChatRepository>((ref) {
-  // 👇 MOCK: Active during development
-  return MockChatRepository();
+  // 👇 REAL: Connected to NestJS backend
+  return ApiChatRepository(ref.watch(dioProvider));
 
-  // 👇 REAL: Uncomment when NestJS is running
-  // return ApiChatRepository(ref.watch(dioProvider));
+  // 👇 MOCK: Uncomment to go back to mock during development
+  // return MockChatRepository();
 });
