@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/chat_message_model.dart';
 import '../data/repositories/chat_repository.dart';
+import '../../scan/data/scan_result_model.dart';
 
 // ── CHAT STATE ─────────────────────────────────────────────────────────
 class ChatState {
@@ -100,6 +101,24 @@ class ChatNotifier extends AsyncNotifier<ChatState> {
     if (currentState != null) {
       state = AsyncValue.data(currentState.copyWith(clearError: true));
     }
+  }
+
+  Future<void> setScanContext(ScanResultModel scan) async {
+    // Pastikan state sudah selesai inisialisasi
+    final currentState = await future;
+
+    final alreadyInjected = currentState.messages.any(
+      (m) => m.content.contains('[Context: ${scan.id}]')
+    );
+    if (alreadyInjected) return;
+
+    final prompt = 'Halo FarmerBot, saya baru saja melakukan scan tanaman.\n'
+        'Diagnosis: ${scan.diagnosis}\n'
+        'Keparahan: ${scan.severity}\n\n'
+        'Bisakah Anda memberikan panduan lebih lanjut untuk mengatasi masalah ini?\n'
+        '[Context: ${scan.id}]';
+
+    await sendMessage(prompt, imageUrl: scan.imageUrl);
   }
 }
 

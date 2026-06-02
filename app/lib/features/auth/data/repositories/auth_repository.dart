@@ -8,7 +8,14 @@ import '../models/user_model.dart';
 // ── 1. THE CONTRACT (Interface) ───────────────────────────────────────
 abstract class AuthRepository {
   Future<String> login({required String email, required String password});
-  Future<String> register({required String name, required String email, required String password});
+  Future<String> register({
+    required String name,
+    required String phone,
+    required String address,
+    required String username,
+    required String password,
+    required String aboutMe,
+  });
   Future<UserModel> getProfile();
   Future<void> logout();
 }
@@ -36,33 +43,46 @@ class MockAuthRepository implements AuthRepository {
     return fakeToken;
   }
 
+  UserModel? _registeredUser;
+
   @override
   Future<String> register({
     required String name,
-    required String email,
+    required String phone,
+    required String address,
+    required String username,
     required String password,
+    required String aboutMe,
   }) async {
     await Future.delayed(AppConstants.mockDelay);
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || username.isEmpty || password.isEmpty) {
       throw Exception('Semua field wajib diisi');
     }
     if (password.length < 6) {
       throw Exception('Password minimal 6 karakter');
     }
-    if (!email.contains('@')) {
-      throw Exception('Format email tidak valid');
-    }
 
-    const fakeToken = 'mock-jwt-token-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
-    await tokenService.saveToken(fakeToken);
-    return fakeToken;
+    _registeredUser = UserModel(
+      id: 'mock-user-002',
+      name: name,
+      email: username,
+      phone: phone,
+      address: address,
+      aboutMe: aboutMe,
+    );
+
+    return 'registered_successfully';
   }
 
   @override
   Future<UserModel> getProfile() async {
     await Future.delayed(const Duration(milliseconds: 500));
-    return UserModel.mock;
+    final tokenExists = await tokenService.hasToken();
+    if (!tokenExists) {
+      throw Exception('Tidak ada token, user belum login');
+    }
+    return _registeredUser ?? UserModel.mock;
   }
 
   @override
@@ -92,17 +112,22 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<String> register({
     required String name,
-    required String email,
+    required String phone,
+    required String address,
+    required String username,
     required String password,
+    required String aboutMe,
   }) async {
     final response = await dio.post('/auth/register', data: {
       'name': name,
-      'email': email,
+      'phone': phone,
+      'address': address,
+      'username': username,
       'password': password,
+      'aboutMe': aboutMe,
     });
-    final token = response.data['accessToken'] as String;
-    await tokenService.saveToken(token);
-    return token;
+    // Do not save token here, let user login manually
+    return 'registered';
   }
 
   @override

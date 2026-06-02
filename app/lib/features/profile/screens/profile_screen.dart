@@ -35,18 +35,46 @@ class ProfileScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Avatar
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              width: 3,
-                            ),
+                        GestureDetector(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Fitur ubah foto profil akan segera hadir')),
+                            );
+                          },
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                    width: 3,
+                                  ),
+                                ),
+                                child: const Icon(Icons.person_rounded, color: Colors.white, size: 44),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.primaryLight, width: 2),
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt_rounded,
+                                    color: AppColors.primaryLight,
+                                    size: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: const Icon(Icons.person_rounded, color: Colors.white, size: 44),
                         ),
                         const SizedBox(height: 12),
                         Text(
@@ -107,59 +135,46 @@ class ProfileScreen extends ConsumerWidget {
 
                   const SizedBox(height: 24),
 
-                  // ── Menu Items ─────────────────────────────────────────
-                  _SectionHeader('Akun'),
+                  // ── Informasi Pribadi ──────────────────────────────────
+                  _SectionHeader('Informasi Pribadi'),
                   const SizedBox(height: 8),
                   _MenuCard(
                     children: [
-                      _MenuItem(
-                        icon: Icons.person_outline_rounded,
-                        label: 'Edit Profil',
-                        onTap: () {},
-                      ),
-                      _MenuItem(
-                        icon: Icons.lock_outline_rounded,
-                        label: 'Ubah Password',
-                        onTap: () {},
-                      ),
-                      _MenuItem(
-                        icon: Icons.notifications_outlined,
-                        label: 'Notifikasi',
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.accentSoft,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            'Segera',
-                            style: AppTextStyles.labelSmall.copyWith(color: AppColors.accent),
-                          ),
-                        ),
-                        onTap: () {},
+                      _ProfileFieldItem(label: 'Nama', value: user?.name ?? '-'),
+                      _ProfileFieldItem(label: 'No. Telepon', value: user?.phone ?? '-'),
+                      _ProfileFieldItem(label: 'Alamat', value: user?.address ?? '-'),
+                      _ProfileFieldItem(label: 'Username', value: user?.email ?? '-'),
+                      _ProfileFieldItem(label: 'Password', value: '••••••••'),
+                      _ProfileFieldItem(
+                        label: 'Tentang Diri',
+                        value: (user?.aboutMe ?? '').isNotEmpty ? user!.aboutMe : 'Belum diisi',
+                        showDivider: false,
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 16),
-                  _SectionHeader('Tentang Aplikasi'),
+                  
+                  ElevatedButton.icon(
+                    onPressed: () => _showEditAboutMeDialog(context, ref, user?.aboutMe ?? ''),
+                    icon: const Icon(Icons.edit_rounded, size: 18),
+                    label: const Text('Edit Profil'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryLight,
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  _SectionHeader('Lainnya'),
                   const SizedBox(height: 8),
                   _MenuCard(
                     children: [
                       _MenuItem(
                         icon: Icons.info_outline_rounded,
                         label: 'Tentang Agrotani',
+                        showDivider: false,
                         onTap: () => _showAboutDialog(context),
-                      ),
-                      _MenuItem(
-                        icon: Icons.star_outline_rounded,
-                        label: 'Beri Rating',
-                        onTap: () {},
-                      ),
-                      _MenuItem(
-                        icon: Icons.bug_report_outlined,
-                        label: 'Laporkan Bug',
-                        onTap: () {},
                       ),
                     ],
                   ),
@@ -227,6 +242,41 @@ class ProfileScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditAboutMeDialog(BuildContext context, WidgetRef ref, String currentAboutMe) {
+    final controller = TextEditingController(text: currentAboutMe);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Edit Tentang Diri', style: AppTextStyles.headlineSmall),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'Ceritakan sedikit tentang Anda...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ref.read(authNotifierProvider.notifier).updateAboutMe(controller.text);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryLight,
+            ),
+            child: const Text('Simpan'),
           ),
         ],
       ),
@@ -391,6 +441,58 @@ class _MenuItem extends StatelessWidget {
           Divider(
             height: 1,
             indent: 52,
+            color: AppColors.divider.withValues(alpha: 0.5),
+          ),
+      ],
+    );
+  }
+}
+
+// ── Profile Field Item ───────────────────────────────────────────────────
+class _ProfileFieldItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool showDivider;
+
+  const _ProfileFieldItem({
+    required this.label,
+    required this.value,
+    this.showDivider = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  value,
+                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
             color: AppColors.divider.withValues(alpha: 0.5),
           ),
       ],

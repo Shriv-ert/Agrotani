@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/router/app_router.dart';
 import '../providers/auth_notifier.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -17,7 +18,10 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
+  final _aboutMeCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
   bool _obscurePassword = true;
@@ -26,7 +30,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _addressCtrl.dispose();
+    _aboutMeCtrl.dispose();
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
     super.dispose();
@@ -38,11 +45,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final success = await ref.read(authNotifierProvider.notifier).register(
       name: _nameCtrl.text.trim(),
-      email: _emailCtrl.text.trim(),
+      username: _usernameCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      address: _addressCtrl.text.trim(),
+      aboutMe: _aboutMeCtrl.text.trim(),
       password: _passwordCtrl.text,
     );
 
-    if (!success && mounted) {
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registrasi berhasil, silakan login'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      context.pushReplacement(AppRoutes.login);
+    } else if (mounted) {
       final error = ref.read(authNotifierProvider).errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -117,23 +135,74 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // ── Email ──────────────────────────────────────────────
-                Text('Email', style: AppTextStyles.titleMedium),
+                // ── No. Telepon ──────────────────────────────────────────────
+                Text('No. Telepon', style: AppTextStyles.titleMedium),
                 const SizedBox(height: 8),
                 TextFormField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                   enabled: !isLoading,
                   decoration: const InputDecoration(
-                    hintText: 'nama@email.com',
-                    prefixIcon: Icon(Icons.email_outlined),
+                    hintText: '08123456789',
+                    prefixIcon: Icon(Icons.phone_outlined),
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Email wajib diisi';
-                    if (!v.contains('@')) return 'Format email tidak valid';
+                    if (v == null || v.trim().isEmpty) return 'No. Telepon wajib diisi';
                     return null;
                   },
+                ),
+                const SizedBox(height: 20),
+
+                // ── Alamat ──────────────────────────────────────────────
+                Text('Alamat', style: AppTextStyles.titleMedium),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _addressCtrl,
+                  textInputAction: TextInputAction.next,
+                  enabled: !isLoading,
+                  decoration: const InputDecoration(
+                    hintText: 'Masukkan alamat lengkap',
+                    prefixIcon: Icon(Icons.home_outlined),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Alamat wajib diisi';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // ── Username ──────────────────────────────────────────────
+                Text('Username', style: AppTextStyles.titleMedium),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _usernameCtrl,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  enabled: !isLoading,
+                  decoration: const InputDecoration(
+                    hintText: 'Masukkan username',
+                    prefixIcon: Icon(Icons.person_outline_rounded),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Username wajib diisi';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+
+                // ── Tentang Diri Anda ─────────────────────────────────────────
+                Text('Tentang Diri Anda', style: AppTextStyles.titleMedium),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _aboutMeCtrl,
+                  textInputAction: TextInputAction.next,
+                  maxLines: 2,
+                  enabled: !isLoading,
+                  decoration: const InputDecoration(
+                    hintText: 'Ceritakan sedikit tentang Anda',
+                    prefixIcon: Icon(Icons.info_outline_rounded),
+                  ),
                 ),
                 const SizedBox(height: 20),
 
@@ -238,7 +307,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed: isLoading ? null : () => context.pop(),
+                        onPressed: isLoading ? null : () => context.pushReplacement(AppRoutes.login),
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
                           minimumSize: Size.zero,

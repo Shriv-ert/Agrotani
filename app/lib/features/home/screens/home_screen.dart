@@ -91,15 +91,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ),
                             // Avatar
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
+                            GestureDetector(
+                              onTap: () => context.go(AppRoutes.profile),
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
+                                ),
+                                child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
                               ),
-                              child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
                             ),
                           ],
                         ),

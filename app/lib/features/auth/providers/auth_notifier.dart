@@ -83,18 +83,23 @@ class AuthNotifier extends Notifier<AuthState> {
 
   Future<bool> register({
     required String name,
-    required String email,
+    required String phone,
+    required String address,
+    required String username,
     required String password,
+    required String aboutMe,
   }) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
-      await _repo.register(name: name, email: email, password: password);
-      final user = await _repo.getProfile();
-      state = AuthState(
-        status: AuthStatus.authenticated,
-        user: user,
-        isLoading: false,
+      await _repo.register(
+        name: name,
+        phone: phone,
+        address: address,
+        username: username,
+        password: password,
+        aboutMe: aboutMe,
       );
+      state = state.copyWith(isLoading: false);
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -109,6 +114,13 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> logout() async {
     await _repo.logout();
     state = const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  void updateAboutMe(String newAboutMe) {
+    if (state.user != null) {
+      final updatedUser = state.user!.copyWith(aboutMe: newAboutMe);
+      state = state.copyWith(user: updatedUser);
+    }
   }
 
   void clearError() {

@@ -17,13 +17,13 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
   }
@@ -33,7 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     FocusScope.of(context).unfocus();
 
     final success = await ref.read(authNotifierProvider.notifier).login(
-      email: _emailCtrl.text.trim(),
+      email: _usernameCtrl.text.trim(),
       password: _passwordCtrl.text,
     );
 
@@ -114,20 +114,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const SizedBox(height: 8),
 
-                      Text('Email', style: AppTextStyles.titleMedium),
+                      Text('Username', style: AppTextStyles.titleMedium),
                       const SizedBox(height: 8),
                       TextFormField(
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: _usernameCtrl,
+                        keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.next,
                         enabled: !isLoading,
                         decoration: const InputDecoration(
-                          hintText: 'nama@email.com',
-                          prefixIcon: Icon(Icons.email_outlined),
+                          hintText: 'Masukkan username',
+                          prefixIcon: Icon(Icons.person_outline_rounded),
                         ),
                         validator: (v) {
-                          if (v == null || v.isEmpty) return 'Email wajib diisi';
-                          if (!v.contains('@')) return 'Format email tidak valid';
+                          if (v == null || v.isEmpty) return 'Username wajib diisi';
                           return null;
                         },
                       ),
@@ -212,7 +211,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             TextButton(
                               onPressed: isLoading
                                   ? null
-                                  : () => context.push(AppRoutes.register),
+                                  : () => context.pushReplacement(AppRoutes.register),
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
@@ -235,7 +234,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       // ── Dev hint ───────────────────────────────────────
                       _DevHint(
                         onTap: () {
-                          _emailCtrl.text = 'budi@agrotani.id';
+                          _usernameCtrl.text = 'budi@agrotani.id';
                           _passwordCtrl.text = 'password123';
                         },
                       ),

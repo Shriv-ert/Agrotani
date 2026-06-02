@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/auth_notifier.dart';
 import '../../features/auth/screens/splash_screen.dart';
+import '../../features/auth/screens/welcome_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/home/screens/home_screen.dart';
@@ -17,6 +18,7 @@ import '../widgets/main_shell.dart';
 // Route name constants — avoid typo bugs
 class AppRoutes {
   static const splash = '/';
+  static const welcome = '/welcome';
   static const login = '/login';
   static const register = '/register';
   static const home = '/home';
@@ -38,7 +40,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true, // Remove in production
     redirect: (context, state) {
       final isOnSplash = state.matchedLocation == AppRoutes.splash;
-      final isOnAuth = state.matchedLocation == AppRoutes.login ||
+      final isOnAuth = state.matchedLocation == AppRoutes.welcome ||
+          state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.register;
 
       // Still checking auth — stay on splash
@@ -46,9 +49,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         return isOnSplash ? null : AppRoutes.splash;
       }
 
-      // Not authenticated — go to login (unless already on auth screens)
+      // Not authenticated — go to welcome (unless already on auth screens)
       if (authState.status == AuthStatus.unauthenticated) {
-        return isOnAuth ? null : AppRoutes.login;
+        return isOnAuth ? null : AppRoutes.welcome;
       }
 
       // Authenticated — go to home (if on auth/splash screens)
@@ -66,6 +69,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // ── AUTH ────────────────────────────────────────────────────
+      GoRoute(
+        path: AppRoutes.welcome,
+        pageBuilder: (_, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const WelcomeScreen(),
+          transitionsBuilder: _fadeTransition,
+        ),
+      ),
       GoRoute(
         path: AppRoutes.login,
         pageBuilder: (_, state) => CustomTransitionPage(

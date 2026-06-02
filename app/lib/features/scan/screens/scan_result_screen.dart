@@ -9,6 +9,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/router/app_router.dart';
 import '../data/scan_result_model.dart';
 import '../providers/scan_notifier.dart';
+import '../../chat/providers/chat_notifier.dart';
 
 class ScanResultScreen extends ConsumerStatefulWidget {
   final ScanResultModel? scanResult;
@@ -171,7 +172,10 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen>
                       ),
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
-                        onPressed: () => context.go(AppRoutes.chat),
+                        onPressed: () {
+                          ref.read(chatNotifierProvider.notifier).setScanContext(scan);
+                          context.go(AppRoutes.chat);
+                        },
                         icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
                         label: const Text('Tanya FarmerBot'),
                         style: OutlinedButton.styleFrom(
