@@ -17,6 +17,9 @@ model users {
   name        String
   email       String   @unique
   password    String   // hashed bcrypt
+  phone       String?  // nomor HP (opsional)
+  address     String?  // alamat (opsional)
+  aboutMe     String?  // deskripsi diri (opsional)
   createdAt   DateTime @default(now())
   scans        scans[]
   chatSessions chatSessions[]
