@@ -1,52 +1,113 @@
 // lib/features/scan/data/scan_repository.dart
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/network/network_providers.dart';
+// ignore: unused_import
+import '../../../../core/network/network_providers.dart'; // Used by ApiScanRepository
+import 'scan_result_model.dart';
 
-// --- 1. THE CONTRACT ---
+// ── 1. THE CONTRACT ────────────────────────────────────────────────────
 abstract class ScanRepository {
-  Future<Map<String, dynamic>> analyzeImage(String imagePath);
+  Future<ScanResultModel> analyzeImage(File imageFile);
+  Future<List<ScanResultModel>> getHistory({int limit = 10});
+  Future<ScanResultModel> getScanById(String id);
+  Future<void> submitFeedback(String scanId, String feedback);
 }
 
-// --- 2. THE MOCK (Week 1 & 2) ---
+// ── 2. MOCK IMPLEMENTATION ────────────────────────────────────────────
 class MockScanRepository implements ScanRepository {
+  // In-memory store for demo
+  final List<ScanResultModel> _history = List.from(ScanResultModel.mockHistory);
+
   @override
-  Future<Map<String, dynamic>> analyzeImage(String imagePath) async {
-    // Fake network delay
-    await Future.delayed(const Duration(seconds: 2));
-    
-    // Fake NestJS/Gemini Response
-    return {
-      "diagnosis": "Bercak Daun Coklat (Brown Spot)",
-      "severity": "Sedang",
-      "confidence": "89%",
-      "recommendation": "1. Potong daun yang sakit\n2. Kurangi penyiraman berlebih\n3. Gunakan fungisida organik."
-    };
+  Future<ScanResultModel> analyzeImage(File imageFile) async {
+    // Simulate AI analysis delay
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Rotate through different diagnoses for demo variety
+    final index = DateTime.now().second % ScanResultModel.mockHistory.length;
+    final mockBase = ScanResultModel.mockHistory[index];
+
+    final newScan = mockBase.copyWith(
+      id: 'scan-${DateTime.now().millisecondsSinceEpoch}',
+      imageUrl: imageFile.path,
+      createdAt: DateTime.now(),
+      feedback: null,
+    );
+
+    _history.insert(0, newScan);
+    return newScan;
+  }
+
+  @override
+  Future<List<ScanResultModel>> getHistory({int limit = 10}) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    return _history.take(limit).toList();
+  }
+
+  @override
+  Future<ScanResultModel> getScanById(String id) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _history.firstWhere(
+      (s) => s.id == id,
+      orElse: () => ScanResultModel.mockSingle,
+    );
+  }
+
+  @override
+  Future<void> submitFeedback(String scanId, String feedback) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    // Update in-memory
+    final idx = _history.indexWhere((s) => s.id == scanId);
+    if (idx != -1) {
+      _history[idx] = _history[idx].copyWith(feedback: feedback);
+    }
   }
 }
 
-// --- 3. THE REAL API (Week 3) ---
+// ── 3. REAL API IMPLEMENTATION ─────────────────────────────────────────
 class ApiScanRepository implements ScanRepository {
   final Dio dio;
+
   ApiScanRepository(this.dio);
 
   @override
-  Future<Map<String, dynamic>> analyzeImage(String imagePath) async {
-    // Pseudo-code for when NestJS is ready
-    // final formData = FormData.fromMap({
-    //   'image': await MultipartFile.fromFile(imagePath),
-    // });
-    // final response = await dio.post('/scan/analyze', data: formData);
-    // return response.data;
-    throw UnimplementedError('API is not ready yet!');
+  Future<ScanResultModel> analyzeImage(File imageFile) async {
+    final formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(
+        imageFile.path,
+        filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      ),
+    });
+    final response = await dio.post('/scan/analyze', data: formData);
+    return ScanResultModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<List<ScanResultModel>> getHistory({int limit = 10}) async {
+    final response = await dio.get('/scan/history', queryParameters: {'limit': limit});
+    final list = response.data as List;
+    return list.map((e) => ScanResultModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  @override
+  Future<ScanResultModel> getScanById(String id) async {
+    final response = await dio.get('/scan/$id');
+    return ScanResultModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> submitFeedback(String scanId, String feedback) async {
+    await dio.post('/scan/$scanId/feedback', data: {'feedback': feedback});
   }
 }
 
-// --- 4. THE RIVERPOD SWITCH (The only line you change later) ---
+// ── 4. PROVIDER SWITCH ──────────────────────────────────────────────────
+// ✅ ONE LINE TOGGLE — Mock ↔ Real API
 final scanRepositoryProvider = Provider<ScanRepository>((ref) {
-  // Right now: Return the Mock
-  return MockScanRepository(); 
-  
-  // When NestJS is ready, comment the line above and uncomment the line below:
+  // 👇 MOCK: Remove this line when backend is ready
+  return MockScanRepository();
+
+  // 👇 REAL: Uncomment when NestJS is running
   // return ApiScanRepository(ref.watch(dioProvider));
 });
