@@ -6,14 +6,17 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { GeminiModule } from './gemini/gemini.module';
 import { ScanModule } from './scan/scan.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
+    
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
     GeminiModule,
-    ScanModule
+    ScanModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [AppService]
