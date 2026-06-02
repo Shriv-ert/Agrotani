@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GeminiService } from '../gemini/gemini.service';
 
@@ -19,17 +19,21 @@ export class ChatService {
   }
 
   async sendMessage(sessionId: string, message: string) {
+    const session = await this.prisma.chatSessions.findUnique({
+      where: { id: sessionId },
+    });
 
-  console.log('SESSION:', sessionId);
-  console.log('MESSAGE:', message);
+    if (!session) {
+      throw new NotFoundException('Chat session tidak ditemukan');
+    }
 
-  await this.prisma.chatMessages.create({
-    data: {
-      sessionId,
-      role: 'user',
-      content: message,
-    },
-  });
+    await this.prisma.chatMessages.create({
+      data: {
+        sessionId,
+        role: 'user',
+        content: message,
+      },
+    });
     const response = await this.geminiService.chat(
       message,
       [],
@@ -44,8 +48,8 @@ export class ChatService {
     });
 
     return {
-        sessionId,
-        reply: response,
-  };
-}
+      sessionId,
+      reply: response,
+    };
+  }
 }

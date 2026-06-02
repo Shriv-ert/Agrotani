@@ -1,22 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { GeminiService } from './gemini/gemini.service';
 
 describe('AppController', () => {
   let appController: AppController;
+  const geminiMock = {
+    chat: jest.fn(),
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [{ provide: GeminiService, useValue: geminiMock }],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('testGemini', () => {
+    it('should call GeminiService chat', async () => {
+      geminiMock.chat.mockResolvedValue('Halo');
+
+      await expect(appController.testGemini('Halo')).resolves.toBe('Halo');
+      expect(geminiMock.chat).toHaveBeenCalledWith('Halo', []);
     });
   });
 });
