@@ -53,9 +53,16 @@ export class ChatService {
       },
     });
 
+    // Get user info to pass to Gemini
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+      select: { name: true, aboutMe: true }
+    });
+
     const response = await this.geminiService.chat(
       dto.message,
       formattedHistory,
+      user
     );
 
     await this.prisma.chatMessages.create({

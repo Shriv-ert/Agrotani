@@ -1,5 +1,6 @@
 // lib/features/scan/screens/scan_screen.dart
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,7 +20,7 @@ class ScanScreen extends ConsumerStatefulWidget {
 
 class _ScanScreenState extends ConsumerState<ScanScreen>
     with SingleTickerProviderStateMixin {
-  File? _selectedImage;
+  XFile? _selectedImage;
   final _picker = ImagePicker();
   bool _isAnalyzing = false;
   late AnimationController _pulseController;
@@ -52,7 +53,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen>
         imageQuality: 85,
       );
       if (picked != null) {
-        setState(() => _selectedImage = File(picked.path));
+        setState(() => _selectedImage = picked);
       }
     } catch (e) {
       if (mounted) {
@@ -249,7 +250,7 @@ class _EmptyImageArea extends StatelessWidget {
 
 // ── Image Preview ─────────────────────────────────────────────────────────
 class _ImagePreview extends StatelessWidget {
-  final File image;
+  final XFile image;
   final VoidCallback onClear;
   const _ImagePreview({required this.image, required this.onClear});
 
@@ -260,10 +261,9 @@ class _ImagePreview extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(24),
-          child: Image.file(
-            image,
-            fit: BoxFit.cover,
-          ),
+          child: kIsWeb
+              ? Image.network(image.path, fit: BoxFit.cover)
+              : Image.file(File(image.path), fit: BoxFit.cover),
         ),
         // Gradient overlay at top
         Positioned(

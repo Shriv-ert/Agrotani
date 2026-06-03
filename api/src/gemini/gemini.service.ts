@@ -84,9 +84,14 @@ Konteks: Tanaman di Indonesia, iklim tropis.
         return responseText;
     }
 
-    async chat(message: string, history: any[]){
+    async chat(message: string, history: any[], user?: { name: string, aboutMe: string | null } | null){
+        let userContext = '';
+        if (user) {
+            userContext = `\nInformasi User:\n- Nama: ${user.name}\n- Tentang saya: ${user.aboutMe || 'Belum diisi'}\nSebut nama user jika relevan.`;
+        }
+        
         // Kita gabungkan Base Prompt + FarmerBot Prompt di sini
-        const chatInstruction = `${this.SYSTEM_INSTRUCTION}\n\nKamu adalah FarmerBot, teman ngobrol petani yang ramah.
+        const chatInstruction = `${this.SYSTEM_INSTRUCTION}\n\nKamu adalah FarmerBot, teman ngobrol petani yang ramah.${userContext}
 Jawab pertanyaan tentang pertanian dengan bahasa sederhana.
 Berikan jawaban yang praktis dan bisa langsung dilakukan.
 Jika user kirim foto, analisis dan kasih diagnosis singkat.

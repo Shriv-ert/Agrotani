@@ -1,5 +1,6 @@
 // lib/features/scan/providers/scan_notifier.dart
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/scan_result_model.dart';
 import '../data/scan_repository.dart';
@@ -10,7 +11,7 @@ class ScanNotifier extends Notifier<AsyncValue<ScanResultModel?>> {
   @override
   AsyncValue<ScanResultModel?> build() => const AsyncValue.data(null);
 
-  Future<ScanResultModel?> analyze(File imageFile) async {
+  Future<ScanResultModel?> analyze(XFile imageFile) async {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(scanRepositoryProvider);

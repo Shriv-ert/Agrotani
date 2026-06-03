@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/network_providers.dart'; // Used by ApiScanRepository
 import 'scan_result_model.dart';
 
+import 'package:image_picker/image_picker.dart';
+
 // ── 1. THE CONTRACT ────────────────────────────────────────────────────
 abstract class ScanRepository {
-  Future<ScanResultModel> analyzeImage(File imageFile);
+  Future<ScanResultModel> analyzeImage(XFile imageFile);
   Future<List<ScanResultModel>> getHistory({int limit = 10});
   Future<ScanResultModel> getScanById(String id);
   Future<void> submitFeedback(String scanId, String feedback);
@@ -20,7 +22,7 @@ class MockScanRepository implements ScanRepository {
   final List<ScanResultModel> _history = List.from(ScanResultModel.mockHistory);
 
   @override
-  Future<ScanResultModel> analyzeImage(File imageFile) async {
+  Future<ScanResultModel> analyzeImage(XFile imageFile) async {
     // Simulate AI analysis delay
     await Future.delayed(const Duration(seconds: 3));
 
@@ -72,11 +74,12 @@ class ApiScanRepository implements ScanRepository {
   ApiScanRepository(this.dio);
 
   @override
-  Future<ScanResultModel> analyzeImage(File imageFile) async {
+  Future<ScanResultModel> analyzeImage(XFile imageFile) async {
+    final bytes = await imageFile.readAsBytes();
     final formData = FormData.fromMap({
-      'image': await MultipartFile.fromFile(
-        imageFile.path,
-        filename: 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      'image': MultipartFile.fromBytes(
+        bytes,
+        filename: imageFile.name.isNotEmpty ? imageFile.name : 'scan_${DateTime.now().millisecondsSinceEpoch}.jpg',
       ),
     });
     final response = await dio.post('/scan/analyze', data: formData);

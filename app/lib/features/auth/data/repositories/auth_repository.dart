@@ -35,8 +35,8 @@ class MockAuthRepository implements AuthRepository {
     if (email.isEmpty || password.isEmpty) {
       throw Exception('Email dan password tidak boleh kosong');
     }
-    if (password.length < 6) {
-      throw Exception('Password minimal 6 karakter');
+    if (password.length < 8) {
+      throw Exception('Password minimal 8 karakter');
     }
 
     const fakeToken = 'mock-jwt-token-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
@@ -60,8 +60,8 @@ class MockAuthRepository implements AuthRepository {
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       throw Exception('Semua field wajib diisi');
     }
-    if (password.length < 6) {
-      throw Exception('Password minimal 6 karakter');
+    if (password.length < 8) {
+      throw Exception('Password minimal 8 karakter');
     }
 
     _registeredUser = UserModel(

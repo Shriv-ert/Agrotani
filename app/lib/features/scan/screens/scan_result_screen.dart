@@ -1,5 +1,6 @@
 // lib/features/scan/screens/scan_result_screen.dart
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -203,7 +204,9 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen>
       children: [
         // Image
         if (isLocalPath)
-          Image.file(File(scan.imageUrl), fit: BoxFit.cover)
+          kIsWeb
+              ? Image.network(scan.imageUrl, fit: BoxFit.cover)
+              : Image.file(File(scan.imageUrl), fit: BoxFit.cover)
         else
           Container(
             decoration: const BoxDecoration(gradient: AppColors.heroGradient),
