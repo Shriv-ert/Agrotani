@@ -6,11 +6,16 @@ import '../../../core/constants/app_constants.dart';
 import '../../auth/providers/auth_notifier.dart';
 import '../../scan/providers/scan_notifier.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final totalScans = user?.totalScans ?? 0;
     final totalChats = user?.totalChats ?? 0;
@@ -140,6 +145,7 @@ class ProfileScreen extends ConsumerWidget {
                         label: 'Tentang Diri',
                         value: (user?.aboutMe ?? '').isNotEmpty ? user!.aboutMe : 'Belum diisi',
                         showDivider: false,
+                        onTap: () => _showEditAboutMeDialog(context, user?.aboutMe ?? ''),
                       ),
                     ],
                   ),
@@ -188,6 +194,78 @@ class ProfileScreen extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditAboutMeDialog(BuildContext context, String currentAboutMe) {
+    final controller = TextEditingController(text: currentAboutMe);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.person_outline_rounded, color: AppColors.primaryLight),
+            const SizedBox(width: 8),
+            Text('Tentang Diri', style: AppTextStyles.headlineSmall),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          maxLines: 4,
+          maxLength: 300,
+          decoration: InputDecoration(
+            hintText: 'Ceritakan sedikit tentang diri Anda...',
+            hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textDisabled),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.divider),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newAboutMe = controller.text.trim();
+              Navigator.pop(dialogContext);
+              try {
+                await ref.read(authNotifierProvider.notifier).updateAboutMe(newAboutMe);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('✅ Tentang diri berhasil diperbarui!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Gagal menyimpan. Coba lagi.'),
+                      backgroundColor: AppColors.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryLight,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Simpan'),
           ),
         ],
       ),
@@ -392,41 +470,64 @@ class _ProfileFieldItem extends StatelessWidget {
   final String label;
   final String value;
   final bool showDivider;
+  final VoidCallback? onTap;
 
   const _ProfileFieldItem({
     required this.label,
     required this.value,
     this.showDivider = true,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 3,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(
+                    value,
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                if (onTap != null) ...[
+                  const SizedBox(width: 4),
+                  const Icon(Icons.edit_rounded, size: 14, color: AppColors.primaryLight),
+                ]
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Text(
-                  label,
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  value,
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-        ),
+        onTap != null
+            ? InkWell(
+                onTap: onTap,
+                borderRadius: showDivider
+                    ? BorderRadius.zero
+                    : BorderRadius.circular(AppConstants.radiusLg),
+                child: content,
+              )
+            : content,
         if (showDivider)
           Divider(
             height: 1,

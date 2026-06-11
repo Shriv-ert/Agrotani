@@ -1,6 +1,6 @@
 import { AuthService } from './auth.service';
-import { Body, Controller, HttpCode, Post, Get, UseGuards } from '@nestjs/common';
-import { UserRegistrationDto, UserLoginDto } from './dto/auth.dto';
+import { Body, Controller, HttpCode, Post, Get, Patch, UseGuards } from '@nestjs/common';
+import { UserRegistrationDto, UserLoginDto, UpdateProfileDto } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -28,5 +28,12 @@ export class AuthController {
     async getProfile(@CurrentUser() user: any) {
         // user.id didapat dari JWT yang sudah dibongkar oleh JwtAuthGuard
         return this.authService.getProfile(user.id);
+    }
+
+    // Endpoint PATCH update profile (aboutMe)
+    @Patch('profile')
+    @UseGuards(JwtAuthGuard)
+    async updateProfile(@CurrentUser() user: any, @Body() dto: UpdateProfileDto) {
+        return this.authService.updateAboutMe(user.id, dto.aboutMe ?? '');
     }
 }

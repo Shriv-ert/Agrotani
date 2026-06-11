@@ -37,3 +37,9 @@ export class UserRegistrationDto {
     @IsString()
     aboutMe?: string;
 }
+
+export class UpdateProfileDto {
+    @IsOptional()
+    @IsString()
+    aboutMe?: string;
+}

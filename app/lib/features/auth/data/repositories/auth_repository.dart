@@ -19,6 +19,7 @@ abstract class AuthRepository {
   });
   Future<UserModel> getProfile();
   Future<void> logout();
+  Future<void> updateAboutMe(String aboutMe);
 }
 
 // ── 2. MOCK IMPLEMENTATION (Use this while backend is being built) ────
@@ -90,6 +91,14 @@ class MockAuthRepository implements AuthRepository {
   Future<void> logout() async {
     await tokenService.clearAll();
   }
+
+  @override
+  Future<void> updateAboutMe(String aboutMe) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (_registeredUser != null) {
+      _registeredUser = _registeredUser!.copyWith(aboutMe: aboutMe);
+    }
+  }
 }
 
 // ── 3. REAL API IMPLEMENTATION (Uncomment when backend is ready) ──────
@@ -140,6 +149,11 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<void> logout() async {
     await tokenService.clearAll();
+  }
+
+  @override
+  Future<void> updateAboutMe(String aboutMe) async {
+    await dio.patch('/auth/profile', data: {'aboutMe': aboutMe});
   }
 }
 

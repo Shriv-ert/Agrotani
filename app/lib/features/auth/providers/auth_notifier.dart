@@ -116,10 +116,17 @@ class AuthNotifier extends Notifier<AuthState> {
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
-  void updateAboutMe(String newAboutMe) {
-    if (state.user != null) {
-      final updatedUser = state.user!.copyWith(aboutMe: newAboutMe);
-      state = state.copyWith(user: updatedUser);
+  Future<void> updateAboutMe(String newAboutMe) async {
+    if (state.user == null) return;
+    final previousUser = state.user;
+    // Optimistic update — UI berubah langsung
+    state = state.copyWith(user: state.user!.copyWith(aboutMe: newAboutMe));
+    try {
+      await _repo.updateAboutMe(newAboutMe);
+    } catch (e) {
+      // Rollback jika request gagal
+      state = state.copyWith(user: previousUser);
+      rethrow;
     }
   }
 

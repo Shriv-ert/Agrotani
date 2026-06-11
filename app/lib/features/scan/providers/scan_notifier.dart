@@ -19,6 +19,8 @@ class ScanNotifier extends Notifier<AsyncValue<ScanResultModel?>> {
       state = AsyncValue.data(result);
       return result;
     } catch (e, st) {
+      print(e);
+      print(st);
       state = AsyncValue.error(e, st);
       return null;
     }

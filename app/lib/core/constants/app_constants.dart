@@ -18,8 +18,8 @@ class AppConstants {
     'API_URL',
     defaultValue: 'http://192.168.200.253:3000/api', // fallback ke IP WiFi saat ini
   );
-  static const Duration connectTimeout = Duration(seconds: 15);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration connectTimeout = Duration(seconds: 200);
+  static const Duration receiveTimeout = Duration(seconds: 200);
 
   // ── STORAGE KEYS ──────────────────────────────────────────────────
   static const String tokenKey = 'agrotani_access_token';

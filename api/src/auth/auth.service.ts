@@ -88,5 +88,22 @@ export class AuthService {
             }
         });
     }
+
+    async updateAboutMe(userId: string, aboutMe: string) {
+        const updated = await this.prisma.users.update({
+            where: { id: userId },
+            data: { aboutMe },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                address: true,
+                aboutMe: true,
+                createdAt: true,
+            }
+        });
+        return updated;
+    }
 }
 
