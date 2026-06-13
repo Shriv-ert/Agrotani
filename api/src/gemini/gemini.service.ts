@@ -69,7 +69,7 @@ Konteks: Tanaman di Indonesia, iklim tropis.
         }
         
         const response = await this.openai.chat.completions.create({
-            model: "gemini/gemini-2.5-pro",
+            model: "gemini/gemini-3.1-pro-preview",
             messages: [
                 { role: "system", content: this.SYSTEM_INSTRUCTION },
                 {
@@ -110,7 +110,7 @@ Akhiri jawaban dengan 1-2 saran pertanyaan lanjutan.`;
         }));
 
         const response = await this.openai.chat.completions.create({
-            model: "gemini/gemini-2.5-pro",
+            model: "gemini/gemini-3.1-pro-preview",
             messages: [
                 { role: "system", content: chatInstruction },
                 ...openaiHistory,
