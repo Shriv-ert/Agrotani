@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="docs/assets/logo.png" alt="Agrotani Logo" width="120" />
-</p>
 
 <h1 align="center">🌾 Agrotani</h1>
 
@@ -30,21 +27,22 @@
   <img src="docs/img/Dashboard.jpg" alt="Dashboard Agrotani" width="250" />
 </p>
 
-<p align="center">
 
-| Home | Scan AI | Hasil Diagnosis | FarmerBot Chat |
-|:----:|:-------:|:---------------:|:--------------:|
+
+
+|                               Home                               |                               Scan AI                                |                               Hasil Diagnosis                                |                          FarmerBot Chat                          |
+| :--------------------------------------------------------------: | :------------------------------------------------------------------: | :--------------------------------------------------------------------------: | :--------------------------------------------------------------: |
 | <img src="docs/img/Dashboard.jpg" alt="Dashboard" width="200" /> | <img src="docs/img/Scan_Image.jpg" alt="Scan Tanaman" width="200" /> | <img src="docs/img/hasil_diagnosis.jpg" alt="Hasil Diagnosis" width="200" /> | <img src="docs/img/chat.jpg" alt="FarmerBot Chat" width="200" /> |
 
-</p>
 
-<p align="center">
 
-| Login | Register | Profil |
-|:-----:|:--------:|:------:|
+
+
+|                          Login                           |                             Register                             |                           Profil                           |
+| :------------------------------------------------------: | :--------------------------------------------------------------: | :--------------------------------------------------------: |
 | <img src="docs/img/Login.jpg" alt="Login" width="200" /> | <img src="docs/img/registrasi.jpg" alt="Register" width="200" /> | <img src="docs/img/profil.jpg" alt="Profil" width="200" /> |
 
-</p>
+
 
 ---
 

@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="docs/assets/agrotani-logo-placeholder.png" alt="Agrotani Logo" width="200"/>
-</p>
 
 <h1 align="center">🌾 AGROTANI — Smart Farming AI Assistant</h1>
 
@@ -2632,15 +2629,16 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 ---
 
 ## 📞 Kontak & Link
+cuma contoh
 
-| Platform | Link |
-|----------|------|
-| 🌐 Website | [www.agrotani.id](https://www.agrotani.id) |
-| 📧 Email | hello@agrotani.id |
-| 📱 Play Store | Coming Soon |
-| 🍎 App Store | Coming Soon |
-| 💬 WhatsApp | +62-XXX-XXXX-XXXX |
-| 📷 Instagram | @agrotani.id |
+| Platform      | Link                                       |
+| ------------- | ------------------------------------------ |
+| 🌐 Website    | [www.agrotani.id](https://www.agrotani.id) |
+| 📧 Email      | hello@agrotani.id                          |
+| 📱 Play Store | Coming Soon                                |
+| 🍎 App Store  | Coming Soon                                |
+| 💬 WhatsApp   | +62-XXX-XXXX-XXXX                          |
+| 📷 Instagram  | @agrotani.id                               |
 
 ---
 
