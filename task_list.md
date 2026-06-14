@@ -227,7 +227,7 @@
 
 **Masalah:**
 - Tombol refresh di chat hanya clear `_messages` dan `_sessionId` di local state
-- Session lama tetap ada di backend (tidak dihapus)
+- Session lama tetap ada di backend (tidak dihapus)d
 - Ini sebenarnya OK (session lama bisa diakses lagi) tapi user mungkin bingung
 
 **Task:**
